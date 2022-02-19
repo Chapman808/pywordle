@@ -2,7 +2,7 @@ import sys
 import random 
 
 def play():
-    print("welcome to pyWORDLE! enter guesses below:")
+    print("welcome to pyWORDLE! enter guesses below (lower case):")
     solution = getRandomWord()
     guesses = []
     while len(guesses) <= 5:
@@ -34,6 +34,8 @@ def receiveGuess():
 def validate_input(inp):
     if len(inp) != 5:
         return False
+    for char in inp:
+        if ord(char) < 97 or ord(char) > 122: return False
     return True
 def formatGuessToColor(guessAsList):
     formatted = [letter.replace('*', '\033[92m').replace('+', '\033[93m').replace('_', '\033[37m') for letter in guessAsList]
