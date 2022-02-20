@@ -4,9 +4,12 @@ from gameplay.util import *
 from autosolver.autosolver import *
 import argparse
 
-def play():
+def play(solution):
     print("welcome to pyWORDLE! enter guesses below (lower case):")
-    solution = getRandomWord()
+    if not solution: solution = getRandomWord()
+    if not validate_input(solution):
+        print("invalid word to solve: " + solution)
+        return
     guesses = []
     while len(guesses) <= 5:
         guessInput = receiveGuess()
@@ -33,13 +36,14 @@ def autosolve(solution, algorithm):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-a', type=str, help="Action to perform: either 'play' or 'solve'", default='play')
+    parser.add_argument('-a', type=str, help="Action to perform: play, autosolve, or cheat", default='play')
     parser.add_argument('-w', type=str, help="five letter word for solve tool", default=None)
     parser.add_argument('--algorithm', type=str, help="autosolver algorithm", default='random')
     args = parser.parse_args()
     action = args.a
     word = args.w
+
     if action == 'play':
-        play()
-    elif action == 'solve': 
+        play(word)
+    elif action == 'autosolve': 
         autosolve(word, args.algorithm)

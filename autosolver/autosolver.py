@@ -37,5 +37,7 @@ class AutoSolver():
 
     #true random guessing algorithm; just chooses a random word from wordlist for each guess, without learning.
     def guess_random(self):
+        def _reduce_wordlist(self):
+            return
         guess = random.choice(self.words)
         return guess
