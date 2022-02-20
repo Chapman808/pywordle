@@ -1,6 +1,7 @@
 from ast import arg
 import sys
 from gameplay.util import *
+from autosolver.autosolver import *
 import argparse
 
 def play():
@@ -19,33 +20,16 @@ def play():
             break
     print("\033[37m\n" + "The word was" + "\033[92m " + solution)
 
-with open('sgb-words.txt') as wordlist:
-    words = wordlist.read().split()
-    
+
 def autosolve(solution, algorithm):
+    wordlist = 'sgb-words.txt'
     if not solution: solution = getRandomWord()
     if not validate_input(solution):
         print("invalid word to solve: " + solution)
         return
-    guesses = []
-    while len(guesses) <= 5:
-        guessInput = generateGuess(algorithm)
-        guessAsList = evaluatedGuess(guessInput, solution)
-        formattedGuess = formatGuessToColor(guessAsList)
-        sys.stdout.write("\n\033[F")
-        print(formattedGuess)
-        guesses.append(guessAsList)
-        if guessIsCorrect(guessAsList, solution):
-            print("\n\n\033[37m" + "solved in " + str(len(guesses)) + "/6 attempts.")
-            break
-    print("\033[37m\n" + "The word was" + "\033[92m " + solution)
+    solver = AutoSolver(solution, algorithm, wordlist)
+    solver.solveToStdOut()
 
-def generateGuess(algorithm):
-    def _random():
-        return random.choice(words)
-    if algorithm == 'random':
-        return _random()
-    print()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
