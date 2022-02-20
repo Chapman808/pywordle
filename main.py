@@ -1,5 +1,7 @@
+from ast import arg
 import sys
-import random 
+from gameplay.util import *
+import argparse
 
 def play():
     print("welcome to pyWORDLE! enter guesses below (lower case):")
@@ -17,34 +19,43 @@ def play():
             break
     print("\033[37m\n" + "The word was" + "\033[92m " + solution)
 
-def evaluatedGuess(guessInput, solution):
-    letterList = [str(char) for char in guessInput]
-    for i, letter in enumerate(letterList):
-        if letter == solution[i]: letterList[i] = '*' + letter
-        elif letter in set(solution): letterList[i] = '+' + letter
-        else: letterList[i] = "_" + letter
-    return letterList
-def receiveGuess():
-    print("\033[37m", end="\r")
-    guess = input()
-    while not validate_input(guess):
-        sys.stdout.write("\033[F" + (" " * len(guess)) + "\n\033[F")
-        guess = input()
-    return guess
-def validate_input(inp):
-    if len(inp) != 5:
-        return False
-    for char in inp:
-        if ord(char) < 97 or ord(char) > 122: return False
-    return True
-def formatGuessToColor(guessAsList):
-    formatted = [letter.replace('*', '\033[92m').replace('+', '\033[93m').replace('_', '\033[37m') for letter in guessAsList]
-    return ''.join(formatted)
-def guessIsCorrect(guessAsList, target):
-    guessString = "".join(guessAsList).replace("_", "").replace("+", "").replace("*", "")
-    return guessString == target
-def getRandomWord():
-    with open("sgb-words.txt") as words:
-        return random.choice(words.read().split())
+with open('sgb-words.txt') as wordlist:
+    words = wordlist.read().split()
+    
+def autosolve(solution, algorithm):
+    if not solution: solution = getRandomWord()
+    if not validate_input(solution):
+        print("invalid word to solve: " + solution)
+        return
+    guesses = []
+    while len(guesses) <= 5:
+        guessInput = generateGuess(algorithm)
+        guessAsList = evaluatedGuess(guessInput, solution)
+        formattedGuess = formatGuessToColor(guessAsList)
+        sys.stdout.write("\n\033[F")
+        print(formattedGuess)
+        guesses.append(guessAsList)
+        if guessIsCorrect(guessAsList, solution):
+            print("\n\n\033[37m" + "solved in " + str(len(guesses)) + "/6 attempts.")
+            break
+    print("\033[37m\n" + "The word was" + "\033[92m " + solution)
+
+def generateGuess(algorithm):
+    def _random():
+        return random.choice(words)
+    if algorithm == 'random':
+        return _random()
+    print()
+
 if __name__ == '__main__':
-    play()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', type=str, help="Action to perform: either 'play' or 'solve'", default='play')
+    parser.add_argument('-w', type=str, help="five letter word for solve tool", default=None)
+    parser.add_argument('--algorithm', type=str, help="autosolver algorithm", default='random')
+    args = parser.parse_args()
+    action = args.a
+    word = args.w
+    if action == 'play':
+        play()
+    elif action == 'solve': 
+        autosolve(word, args.algorithm)
